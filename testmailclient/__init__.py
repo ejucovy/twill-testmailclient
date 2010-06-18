@@ -18,6 +18,7 @@ by the server.
 from twill.namespaces import get_twill_glocals
 from twill.errors import TwillAssertionError, TwillException
 from twill.commands import get_browser
+from twill.commands import go
 
 def clear_mail():
     browser = get_browser()
@@ -101,6 +102,23 @@ def mail_contains(value):
     if value not in body:
         raise TwillAssertionError("no match for <%s> in mail at %s" % (
                 value, mail))
+
+def click_link_in_mail(num=1):
+    if num < 1:
+        raise TwillException("You must use a positive index "
+                             "for the link you wish to click")
+    mail = selected_mail()
+    fp = open(mail)
+    text = fp.read()
+    fp.close()
+    text = text.split()
+    links = [word for word in text if word.startswith("http://")]
+    if len(links) < 0:
+        raise TwillAssertionError(
+            "Only %s links found in mail %s, "
+            "so we can't click link #%s" % (
+                len(links), mail, num))
+    return go(link)
 
 def send_mail(file, receiverURL):
     fp = open(file)
